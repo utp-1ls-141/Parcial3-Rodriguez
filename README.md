@@ -1,4 +1,3 @@
-# 1LS141-PanamaJerseys
-Proyecto Final para Desarrollo 9 
-Eric Dominguez
-Eduardo Dudley
+# 1LS141-GoodWarehouse
+Proyecto Final
+Eliecer Rodriguez
