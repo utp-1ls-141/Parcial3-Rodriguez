@@ -1,86 +1,84 @@
 "use strict";
 let express = require('express');
 let router = express.Router();
-let user = require('../models/user');
-let usuarios = require('../models/usuarios')
+let adm_usuario = require('../models/usuarios');
+let cliente = require('../models/cliente')
 
-
-//LOGIN
+//Renderizar views
 router.get('/', function(req, res){
 	res.render('index');
 });
-
 
 router.get('/login', function(req, res){
 	res.render('login');
 });
 
-// router.get('/adminusr', function(req, res){
-// 	res.render('adminusr');
-// });
+router.get('/registrarse', function(req, res){
+	res.render('registro');
+});
 
+//loginvalidar
 router.post('/login', function(req, res, next){
-	user.authenticate(req.body.email, req.body.password, function(error,user){
+	adm_usuario.authenticate(req.body.email, req.body.password, function(error,adm_usuario){
 		if(error)
 			next(error);
-		else if(!user) {
+		else if(!adm_usuario) {
 			var err = new Error('Usuario o contraseña incorrecta');
             err.status = 401;
 			next(err); }
 		else{
-			req.session.username = user.username;
-			res.redirect('/adminusr');  }
+			req.session.username = adm_usuario.username;
+			res.redirect('/CRUD_Prueba');  }
 	});
 });
 
-router.get('/adminusr',function(req, res, next){
+//Estudiantes
+router.get('/CRUD_Prueba',function(req, res, next){
 	if(!req.session.username){
 		res.redirect('/login');
 	}
-	// else 
-	// res.render('adminusr',{usuario:req.session.username, modelo:user});
-	usuarios.findAll(function(error,users){
+	cliente.findAll(function(error,adm_usuario){
 		if(error)
 			next(error);
-		else if(!users)
-			users = [];
+		else if(!adm_usuario)
+			adm_usuario = [];
 		else
-			res.render('adminusr',{usuario:req.session.username, modelo:users});
+			res.render('CRUD_Prueba',{usuarios:req.session.username, modelo:adm_usuario});
 	}); 
 });
 
 //INSERTAR
 router.post('/insertar', function(req, res, next){
-	usuarios.insert(req.body.nombre,req.body.apellido,req.body.usuario,req.body.password,req.body.correo,req.body.sexo,req.body.direccion1,req.body.direccion2,req.body.telefono, function(error,user){
+	cliente.insert(req.body.username,req.body.nombre,req.body.apellido,req.body.correo,req.body.telefono,req.body.password,req.body.passConfirm, function(error,user){
 		if(error)
 			next(error);
-		else if(user){
-			var err = new Error('usuario ya existente');
+		else if(adm_usuario){
+			var err = new Error('Usuario ya existente');
 			err.status = 401;
 			next(err);}
 		else
-			res.redirect('/adminusr');
+			res.redirect('/CRUD_Prueba');
 	  });
 });
 
-// ACTUALIZAR
+//ACTUALIZAR
 router.post('/actualizar', function(req, res, next){
-	usuarios.update(req.body.nombre,req.body.apellido,req.body.usuario,req.body.password,req.body.correo,req.body.sexo,req.body.direccion1,req.body.direccion2,req.body.telefono, function(error,msg){
-		console.log(req.body.usuario);
+	cliente.update(req.body.username,req.body.nombre,req.body.apellido,req.body.correo,req.body.telefono, function(error,msg){
+		console.log(req.body.username);
 		if(error)
 			next(error);
 		else if(!msg){
 			var err = new Error('Usuario no existe');
 			err.status = 401;
 			next (err);}
-		res.redirect('/adminusr');
+		res.redirect('/CRUD_Prueba');
 		
 	  });
 });
 
-// //ELIMINAR
+//ELIMINAR
 router.post('/eliminar', function(req, res, next){
-	usuarios.delete(req.body.usuario, function(error,msg){
+	cliente.delete(req.body.username, function(error,msg){
 		if(error)
 			next(error);
 		else if(msg){
@@ -90,75 +88,8 @@ router.post('/eliminar', function(req, res, next){
 		}
 		else{
 			console.log('exito');
-			res.redirect('/adminusr');}
+			res.redirect('/CRUD_Prueba');}
 	  });
 });
-
-
-//ESTATUS PEDIDO cambiar Todo donde dice users
-router.get('/adminstatus',function(req, res, next){
-	if(!req.session.username){
-		res.redirect('/login');
-	}
-	// else 
-	// res.render('adminusr',{usuario:req.session.username, modelo:user});
-	estados.findAll(function(error,users){
-		if(error)
-			next(error);
-		else if(!users)
-			users = [];
-		else
-			res.render('adminstatus',{usuario:req.session.username, modelo:users});
-	}); 
-});
-
-//INSERTAR
-router.post('/insertarP', function(req, res, next){
-	estados.insert(req.body.ordernum,req.body.orderstat,req.body.orderdate,req.body.usuario,req.body.correo,req.body.direccion1,req.body.direccion2,req.body.telefono, function(error,user){
-		if(error)
-			next(error);
-		else if(user){
-			var err = new Error('orden ya existente');
-			err.status = 401;
-			next(err);}
-		else
-			res.redirect('/adminstatus');
-	  });
-});
-
-// ACTUALIZAR
-router.post('/actualizarP', function(req, res, next){
-	estados.update(req.body.ordernum,req.body.orderstat,req.body.orderdate,req.body.usuario,req.body.correo,req.body.direccion1,req.body.direccion2,req.body.telefono, function(error,msg){
-		console.log(req.body.ordernum);
-		if(error)
-			next(error);
-		else if(!msg){
-			var err = new Error('Orden no existe');
-			err.status = 401;
-			next (err);}
-		res.redirect('/adminstatus');
-		
-	  });
-});
-
-// //ELIMINAR
-router.post('/eliminarP', function(req, res, next){
-	estados.delete(req.body.ordernum, function(error,msg){
-		if(error)
-			next(error);
-		else if(msg){
-			var err = new Error('orden no existe');
-			err.status = 401;
-			next(err);
-		}
-		else{
-			console.log('exito');
-			res.redirect('/adminstatus');}
-	  });
-});
-
-
-
-
 
 module.exports = router;

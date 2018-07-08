@@ -1,89 +1,46 @@
 "use strict";
 const mongoose = require('mongoose');
+const bcrypt = require('bcrypt');
 
-
- var usuariosSchema = new mongoose.Schema({
-    nombre: { type: String, required: true, },
-    apellido: { type: String, required: false, },
-    usuario: { type: String, required: true, },
-    password: { type: String, required: true, },
-    
+var usuariosappSchema = new mongoose.Schema({
+    email: { type: String, unique: true, required: true, trim: true },
+    username: { type: String, unique: false, required: true, trim: true },
+    password: { type: String, unique: false, required: true, trim: true },
+    passConfirm: { type: String, unique: false, required: true, trim: true },
 },{collection:'usuarios'});
 
 
-usuariosSchema.statics.findAll = function(callback){
-    Usuarios.find({},function(err,users) {
+
+usuariosappSchema.statics.authenticate = function(email,password,callback){
+    Usuarios.findOne({email:email},'username password',function(err,user){
         if(err)
             return callback(err);
-        else if(!users)
+        else if(!user)
             return callback();
-        return callback(null,users);
+        var hash = user.password;
+        if(bcrypt.compareSync(password, hash))
+            return callback(null,user)
+        else
+            return callback();
     })
-}
-
-usuariosSchema.statics.insert = function(nombre,apellido,usuario,password,correo,sexo,direccion1,direccion2,telefono,callback){
-    Usuarios.findOne({usuario:usuario},'usuario',function(err,user){
+    
+    /* User.findOne({email:email,password:password},'username',function(err,users){
         if(err){
-            return callback(err)
+            console.log(err);
         }
-        else if(user){
-            return callback(user);
+        else if(!users){
+            var err = new Error('Usuario o password incorrectos');
+            err.status = 401;
+            return callback(err);
         }
         else{
-            var data={
-                nombre:nombre,
-                apellido:apellido,
-                usuario:usuario,
-                password:password,
-                };
-            Usuarios.create(data,function(err){
-                if(err)
-                    return callback(err);
-                return callback();
-            })}
-    })   
-}
-usuariosSchema.statics.update = function(nombre,apellido,usuario,password,correo,sexo,direccion1,direccion2,telefono,callback){
-    Usuarios.findOne({usuario:usuario},'nombre apellido usuario password correo sexo direccion1 direccion2 telefono',function(err,user){
-        if(err)
-            return callback(err);
-        else if(!user){
-            console.log(user);
-            return callback();
+            console.log(users);
+            return callback(null,users);
         }
-        else{
-                if(nombre)
-                    user.nombre = nombre;
-                if(apellido)
-                    user.apellido=apellido;
-                if(usuario)
-                    user.usuario = usuario;               
-                if(password)
-                    user.password = password;
-                user.save(function(err){
-                    if(err)
-                        return callback(err);
-                    return callback(null,true);
-                });
-            }
-    })   
+    })   */ 
 }
 
-usuariosSchema.statics.delete = function(usuario,callback){
-    Usuarios.findOne({usuario:usuario},'usuario',function(err,users){
-        if(err)
-            return callback(err);
-        else if(!users)
-            return callback(null,'usuario no existe');
-        Usuarios.deleteOne({usuario:usuario}, function(err){
-                if(err)
-                    return callback(err);
-                return callback();//Success
-            });
-    })   
-}
-
-let Usuarios = mongoose.model('Usuarios',usuariosSchema);
-
+let Usuarios = mongoose.model('Usuarios',usuariosappSchema);
 module.exports = Usuarios;
+
 

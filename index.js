@@ -8,9 +8,13 @@ let MongoStore = require('connect-mongo')(session);
 
 //Mongoose Connection 
 let mongoose = require('mongoose');
-mongoose.connect('mongodb://@localhost:27017/storagedb')
+mongoose.connect('mongodb://Eliecer:eliecer123@localhost/storagedb?authDatabase=storagedb');
+let db = mongoose.connection;
 
-
+db.on('error',console.error.bind(console,'Error de Conexion: '));
+db.once('open',() => {
+	console.log('Connected to Mongo Database');
+});
 
 // Setting View Engine
 app.set('views', path.join(__dirname, 'views'));
@@ -25,24 +29,20 @@ app.use(session({
 	secret: 'work hard',
 	resave: true,
 	saveUninitialized: false,
-	
+	store: new MongoStore({
+		mongooseConnection: db
+	})
   }));
 
-  // Routes
+// Routes
 let routes = require('./routes/router');
 app.use('/',routes);
-
-
-app.post("../registrar", function(req,res){
-	if(req.body.nombre === undefined){
-		res.send("nombre requeridos");
-	}	
+app.use(function(req,res,next){
+	let err = new Error('Archivo no encontrado');
+	err.status=404;
+	next(err);
 });
 
-var registrar = require("./controllers/registrar.js")
-
 // Open listening port
-// Set PORT:
-// Mac / Linux: export NODE_JS_PORT=3000
 const port = process.env.NODE_JS_PORT || 3000;
 app.listen(port, function(){ console.log(`Escuchando en el puerto ${port}...`) });

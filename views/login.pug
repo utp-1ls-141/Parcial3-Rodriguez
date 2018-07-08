@@ -57,13 +57,13 @@ section#login
       .col-xs-12
         .form-wrap
           h1 Inicia sesi&oacute;n
-          form#login-form(role='form' action='javascript:;' method='post' autocomplete='off')
+          form#login-form(role='form' method='post')
             .form-group
-              label.sr-only(for='email') Usuario / Correo
-              input#email.form-control(type='email' name='email' placeholder='Inrese su correo o nombre de usuario')
+              label.sr-only(for='inputEmail') Usuario / Correo
+              input#inputEmail.form-control(type='email' name='email' placeholder='Inrese su correo o nombre de usuario', required='')
             .form-group
-              label.sr-only(for='key') Contrase&ntilde;a
-              input#key.form-control(type='password' name='key' placeholder='Contraseña')
+              label.sr-only(for='inputPassword') Contrase&ntilde;a
+              input#inputPassword.form-control(type='password' name='password' placeholder='Contraseña')
             .checkbox
               span.character-checkbox(onclick='showPassword()')
               span.label Monstrar contrase&ntilde;a
